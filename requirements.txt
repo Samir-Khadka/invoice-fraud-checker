@@ -1,0 +1,7 @@
+# Invoice Fraud Checker
+# OCR: tesseract binary preferred on the host; RapidOCR fallback via pip.
+fastapi>=0.110
+uvicorn[standard]>=0.29
+python-multipart>=0.0.9
+rapidocr-onnxruntime>=1.3
+Pillow>=10

@@ -72,9 +72,28 @@ is fully isolated by `business_id`.
 - This is a **flagging tool, not an accountant.** It surfaces items for human
   review — it never auto-rejects or auto-pays. It doesn't replace professional
   accounting or tax advice.
-- v0.1 is the schema + rule engine + history store (SQLite). OCR field
-  extraction, Postgres, and a mobile/WhatsApp interface come next — in that
-  order, after the extraction pipeline is tested against ~50 real invoices.
+
+## Web app (v0.3) — photograph, check, review, save
+
+```bash
+pip install -r requirements.txt
+uvicorn fraudcheck.web:app --host 127.0.0.1 --port 8000
+```
+
+Mobile-first pages in a light palette: upload an invoice photo (phone camera
+works via the file picker), see what was read plus plain-language flags,
+then **you** decide — "Looks right, save to history" or discard. History is
+scoped per business name (cookie) and stored in `data/invoices.db` (SQLite).
+A `/history` page lists saved invoices. 10&nbsp;MB upload cap; PNG/JPG/WEBP/
+TIFF/BMP only. v1 has no login — one small business per deployment, or local
+use.
+
+## Roadmap
+
+- v0.1 — schema + rule engine + history store (SQLite) ✓
+- v0.2 — OCR extraction pipeline + accuracy harness ✓
+- v0.3 — web upload/review app ✓
+- next — 50-real-invoice pilot, Postgres, WhatsApp/Telegram bot interface
 
 ## Layout
 
