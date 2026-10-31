@@ -32,11 +32,7 @@ class WebAuthTests(unittest.TestCase):
         web.DATA = self.tmp
         web.DB = self.tmp / "t.db"
         web.UPLOADS = self.tmp / "uploads"
-        web.PENDING.clear()
         self.client = TestClient(web.app, follow_redirects=False)
-
-    def tearDown(self):
-        web.PENDING.clear()
 
     def _setup_admin(self, username="boss", password="admin-pass-1",
                      business="Himal Traders"):
@@ -168,7 +164,7 @@ class WebAuthTests(unittest.TestCase):
         self.assertIn("Himal Traders Pvt. Ltd.", r.text)
         self.assertIn("Looks right", r.text)
         import re
-        token = re.search(r"name='token' value='([a-f0-9]+)'", r.text).group(1)
+        token = re.search(r"name='token' value='([^']+)'", r.text).group(1)
         r = self.client.post("/record", data={"token": token})
         self.assertEqual(r.status_code, 200)
         self.assertIn("Saved", r.text)

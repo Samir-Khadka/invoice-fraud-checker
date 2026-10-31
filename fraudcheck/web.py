@@ -12,7 +12,12 @@ Run:  uvicorn fraudcheck.web:app --host 127.0.0.1 --port 8000
 """
 from __future__ import annotations
 
+import base64
+import hashlib
+import hmac
 import html
+import json
+import os
 import re
 import secrets
 import sqlite3
@@ -28,14 +33,20 @@ from .rules import analyze
 from .schema import Invoice
 
 ROOT = Path(__file__).resolve().parent.parent
-DATA = ROOT / "data"
+# IFC_DATA_DIR overrides the data dir (e.g. /tmp on Vercel serverless,
+# where the filesystem is ephemeral — history resets on cold starts).
+DATA = Path(os.environ.get("IFC_DATA_DIR", ROOT / "data"))
 UPLOADS = DATA / "uploads"
 DB = DATA / "invoices.db"
 MAX_BYTES = 10 * 1024 * 1024
 ALLOWED_EXT = {".png", ".jpg", ".jpeg", ".webp", ".tif", ".tiff", ".bmp"}
 
-# token -> extracted invoice dict, awaiting human review (in-memory, v1)
-PENDING: dict[str, dict] = {}
+# Review tokens are stateless: the extracted invoice is JSON-serialised into
+# a hidden form field, HMAC-signed with IFC_SECRET. No server-side session
+# state, so /check -> /record works across serverless instances. Set
+# IFC_SECRET as an env var in production; unset = a per-process secret
+# (fine locally, may flake under multi-instance load).
+IFC_SECRET = os.environ.get("IFC_SECRET", secrets.token_hex(32))
 
 app = FastAPI(title="Invoice Fraud Checker")
 
@@ -91,6 +102,28 @@ th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line)}
 .badge{display:inline-block;font-size:.72rem;font-weight:700;border-radius:20px;
 padding:2px 10px;background:#ece5f5;color:var(--violet)}
 """
+
+
+def _sign_data(data: dict) -> str:
+    raw = json.dumps(data, ensure_ascii=False, separators=(",", ":")).encode()
+    sig = hmac.new(IFC_SECRET.encode(), raw, hashlib.sha256).hexdigest()
+    return base64.urlsafe_b64encode(raw).decode() + "." + sig
+
+
+def _unsign_data(token: str) -> dict | None:
+    try:
+        payload, sig = token.rsplit(".", 1)
+        raw = base64.urlsafe_b64decode(payload.encode())
+    except Exception:
+        return None
+    expect = hmac.new(IFC_SECRET.encode(), raw, hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(expect, sig):
+        return None
+    try:
+        data = json.loads(raw.decode())
+    except Exception:
+        return None
+    return data if isinstance(data, dict) else None
 
 
 def page(title: str, body: str, user: dict | None = None) -> str:
@@ -294,8 +327,7 @@ are clearly visible.</p>
 <p><a class='btn' href='/'>Try again</a></p></div>""", user)
 
     result = analyze(data, biz, store())
-    token = secrets.token_hex(12)
-    PENDING[token] = {"user_id": user["id"], "data": data}
+    token = _sign_data({"user_id": user["id"], "invoice": data})
 
     fields = f"""
 <dl class='kv'>
@@ -335,12 +367,20 @@ become the history future checks compare against.</p>
 
 @app.post("/record", response_class=HTMLResponse)
 def record(token: str = Form(...), user: dict = Depends(require_user)):
-    pending = PENDING.pop(token, None)
-    if not pending or pending["user_id"] != user["id"]:
+    payload = _unsign_data(token)
+    data = payload.get("invoice") if payload else None
+    if not data or payload.get("user_id") != user["id"]:
         return page("Expired", """
-<div class='card'><p>That review has expired or was already saved.</p>
+<div class='card'><p>That review has expired or belongs to another session.
+Please check the invoice again.</p>
 <p><a class='btn' href='/'>Check another invoice</a></p></div>""", user)
-    inv = Invoice.from_dict(pending["data"])
+    try:
+        inv = Invoice.from_dict(data)
+    except ValueError:
+        return page("Expired", """
+<div class='card'><p>That review is no longer valid. Please check the invoice
+again.</p>
+<p><a class='btn' href='/'>Check another invoice</a></p></div>""", user)
     store().record_invoice(user["business_id"], inv)
     return page("Saved", f"""
 <div class='card'><div class='ok'><b>✓ Saved.</b> Invoice

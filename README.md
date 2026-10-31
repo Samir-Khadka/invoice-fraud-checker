@@ -99,6 +99,37 @@ page lists saved invoices. 10&nbsp;MB upload cap; PNG/JPG/WEBP/TIFF/BMP only.
   it), no brute-force lockout yet — fine for a small team, not for the open
   internet.
 
+## Deploy on Vercel
+
+The app is Vercel-ready (`vercel.json` + `api/index.py`; `requirements.txt`
+at the repo root).
+
+1. Push this repo to GitHub (or it already is).
+2. In Vercel: **Add New → Project → Import** the repo. Framework preset:
+   **Other**. No build command needed.
+3. Environment variables (recommended):
+   - `IFC_SECRET` — any long random string. Signs the review tokens; without
+     it each serverless instance uses its own secret, which can flake under
+     load. Generate: `openssl rand -hex 32`.
+   - `IFC_DATA_DIR` — leave unset; the app uses `/tmp` automatically on
+     Vercel (see limits below).
+4. Deploy. First visit `/setup` to create the admin account.
+
+**Honest limits on Vercel's free tier:**
+- **OCR uses RapidOCR** (pip-bundled models, no download) — Tesseract isn't
+  available on serverless. Same extraction code, slightly different OCR
+  engine.
+- **History is ephemeral** — SQLite lives on the serverless filesystem, so
+  saved invoices disappear on cold starts. Fine for trying it out; a real
+  deployment wants Postgres (Neon free tier) — that's the next slice.
+- **Cold starts** take a few seconds (the OCR models load into memory).
+- Review tokens are stateless HMAC-signed payloads, so check → save works
+  across serverless instances.
+
+Prefer a traditional server? `uvicorn fraudcheck.web:app --host 127.0.0.1
+--port 8000` runs it anywhere Python runs (Render, a VPS, your laptop) with
+persistent SQLite and optional Tesseract.
+
 ## Roadmap
 
 - v0.1 — schema + rule engine + history store (SQLite) ✓
