@@ -82,17 +82,29 @@ uvicorn fraudcheck.web:app --host 127.0.0.1 --port 8000
 
 Mobile-first pages in a light palette: upload an invoice photo (phone camera
 works via the file picker), see what was read plus plain-language flags,
-then **you** decide — "Looks right, save to history" or discard. History is
-scoped per business name (cookie) and stored in `data/invoices.db` (SQLite).
-A `/history` page lists saved invoices. 10&nbsp;MB upload cap; PNG/JPG/WEBP/
-TIFF/BMP only. v1 has no login — one small business per deployment, or local
-use.
+then **you** decide — "Looks right, save to history" or discard. A `/history`
+page lists saved invoices. 10&nbsp;MB upload cap; PNG/JPG/WEBP/TIFF/BMP only.
+
+### Login & admin control (v0.4)
+
+- **First run:** visit `/setup` to create the admin account (username +
+  password, min 8 chars). `/setup` disables itself afterwards.
+- **Roles:** `admin` sees every business and manages users at `/admin`
+  (create, disable/enable, delete, reset password); `user` sees and checks
+  only their own business.
+- **Safeguards:** you can't delete or disable your own account, nor remove
+  the last admin. Passwords are PBKDF2-HMAC-SHA256 (200k iterations,
+  per-user salt); sessions are random tokens in HttpOnly cookies, 7-day expiry.
+- **Honest limits:** no 2FA, no self-service password reset (an admin resets
+  it), no brute-force lockout yet — fine for a small team, not for the open
+  internet.
 
 ## Roadmap
 
 - v0.1 — schema + rule engine + history store (SQLite) ✓
 - v0.2 — OCR extraction pipeline + accuracy harness ✓
 - v0.3 — web upload/review app ✓
+- v0.4 — login + admin control ✓
 - next — 50-real-invoice pilot, Postgres, WhatsApp/Telegram bot interface
 
 ## Layout
@@ -106,5 +118,7 @@ use.
 - `tests/test_rules.py` — 19 tests, one fixture history, each rule tested alone
 - `tests/test_extract.py` — 11 parser unit tests + 12-image pipeline accuracy
   harness + image-to-flag end-to-end test
+- `tests/test_web.py` — 10 tests: setup/login, roles, business isolation,
+  admin safeguards, full upload journey
 - `tests/synth.py` — synthetic invoice renderer with ground truth (test rig)
 - `demo.py` — end-to-end example
