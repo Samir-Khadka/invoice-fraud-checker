@@ -1,0 +1,35 @@
+{
+ "vendor_name": "Himal Traders Pvt. Ltd.",
+ "invoice_number": "HT-1063",
+ "invoice_date": "2026-01-20",
+ "currency": "NPR",
+ "line_items": [
+  {
+   "description": "Cement bags",
+   "quantity": 50,
+   "unit_price": 900,
+   "amount": 45000
+  },
+  {
+   "description": "Bricks",
+   "quantity": 2000,
+   "unit_price": 18,
+   "amount": 36000
+  },
+  {
+   "description": "Sand cubic ft",
+   "quantity": 100,
+   "unit_price": 85,
+   "amount": 8500
+  }
+ ],
+ "subtotal": 89500,
+ "tax_amount": 11635.0,
+ "total": 101135.0,
+ "bank": {
+  "account_name": "",
+  "account_number": "1234567890",
+  "bank_name": "Nabil Bank",
+  "branch": "Urlabari Branch"
+ }
+}

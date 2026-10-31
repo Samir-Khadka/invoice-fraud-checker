@@ -44,6 +44,29 @@ store.record_invoice("my-shop", Invoice.from_dict(invoice_dict))
 duplicate check matches the invoice against itself. Each business's history
 is fully isolated by `business_id`.
 
+## OCR extraction pipeline (v0.2)
+
+`image -> fraudcheck/ocr.py -> fraudcheck/extract.py -> Invoice`
+
+- **OCR backends:** Tesseract binary first (install: `apt install tesseract-ocr`,
+  or the UB Mannheim build on Windows); falls back to RapidOCR
+  (`pip install rapidocr_onnxruntime`) when tesseract is absent.
+- **Field extraction** (`extract.py`) is heuristic and regex-based — every
+  parser returns `None` when unsure instead of guessing. A wrong invoice
+  number is worse than a missing one for fraud checks.
+- **Measured accuracy** on 12 clean synthetic invoices
+  (`tests/synth.py` renders them with known ground truth,
+  `tests/test_extract.py` scores field-by-field):
+
+  invoice_number / date / vendor / total / bank_account: **100%** ·
+  subtotal / tax_amount: **100%** (of invoices that have them) ·
+  line items: **100%** count and sums
+
+- **Honest caveat:** synthetic renders are the *ceiling* — clean fonts, no
+  skew, no shadows. Real phone photos will score lower. The spec's
+  50-real-invoice pilot is still required before this touches real money;
+  `tests/synth.py` + the harness give you the rig to run that pilot.
+
 ## Honest limits
 
 - This is a **flagging tool, not an accountant.** It surfaces items for human
@@ -59,5 +82,10 @@ is fully isolated by `business_id`.
 - `fraudcheck/history.py` — per-business history (SQLite; narrow interface so
   Postgres can replace it later)
 - `fraudcheck/rules.py` — the six rules + `analyze()`
+- `fraudcheck/ocr.py` — OCR wrapper (Tesseract primary, RapidOCR fallback)
+- `fraudcheck/extract.py` — heuristic field extraction from OCR text
 - `tests/test_rules.py` — 19 tests, one fixture history, each rule tested alone
+- `tests/test_extract.py` — 11 parser unit tests + 12-image pipeline accuracy
+  harness + image-to-flag end-to-end test
+- `tests/synth.py` — synthetic invoice renderer with ground truth (test rig)
 - `demo.py` — end-to-end example

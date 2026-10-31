@@ -1,0 +1,35 @@
+{
+ "vendor_name": "Koshi Hardware Store",
+ "invoice_number": "1077",
+ "invoice_date": "2026-05-08",
+ "currency": "NPR",
+ "line_items": [
+  {
+   "description": "Bricks",
+   "quantity": 2000,
+   "unit_price": 18,
+   "amount": 36000
+  },
+  {
+   "description": "Pipes 2in",
+   "quantity": 30,
+   "unit_price": 450,
+   "amount": 13500
+  },
+  {
+   "description": "Paint 4L",
+   "quantity": 8,
+   "unit_price": 2400,
+   "amount": 19200
+  }
+ ],
+ "subtotal": null,
+ "tax_amount": null,
+ "total": 68700.0,
+ "bank": {
+  "account_name": "",
+  "account_number": "9988776655",
+  "bank_name": "Global IME Bank",
+  "branch": "Damak"
+ }
+}

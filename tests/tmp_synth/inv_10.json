@@ -1,0 +1,35 @@
+{
+ "vendor_name": "Everest Suppliers",
+ "invoice_number": "INV/1070",
+ "invoice_date": "2026-06-15",
+ "currency": "NPR",
+ "line_items": [
+  {
+   "description": "Steel rod kg",
+   "quantity": 120,
+   "unit_price": 95,
+   "amount": 11400
+  },
+  {
+   "description": "Pipes 2in",
+   "quantity": 30,
+   "unit_price": 450,
+   "amount": 13500
+  },
+  {
+   "description": "Bricks",
+   "quantity": 2000,
+   "unit_price": 18,
+   "amount": 36000
+  }
+ ],
+ "subtotal": 60900,
+ "tax_amount": 7917.0,
+ "total": 68817.0,
+ "bank": {
+  "account_name": "",
+  "account_number": "1122334455",
+  "bank_name": "NIC Asia Bank",
+  "branch": "Biratnagar"
+ }
+}

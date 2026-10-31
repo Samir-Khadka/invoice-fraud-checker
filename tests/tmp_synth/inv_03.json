@@ -1,0 +1,35 @@
+{
+ "vendor_name": "Himal Traders Pvt. Ltd.",
+ "invoice_number": "HT-1021",
+ "invoice_date": "2026-09-14",
+ "currency": "NPR",
+ "line_items": [
+  {
+   "description": "Cement bags",
+   "quantity": 50,
+   "unit_price": 900,
+   "amount": 45000
+  },
+  {
+   "description": "Steel rod kg",
+   "quantity": 120,
+   "unit_price": 95,
+   "amount": 11400
+  },
+  {
+   "description": "Sand cubic ft",
+   "quantity": 100,
+   "unit_price": 85,
+   "amount": 8500
+  }
+ ],
+ "subtotal": 64900,
+ "tax_amount": 8437.0,
+ "total": 73337.0,
+ "bank": {
+  "account_name": "",
+  "account_number": "1234567890",
+  "bank_name": "Nabil Bank",
+  "branch": "Urlabari Branch"
+ }
+}

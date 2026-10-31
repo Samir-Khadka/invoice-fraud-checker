@@ -1,0 +1,35 @@
+{
+ "vendor_name": "Everest Suppliers",
+ "invoice_number": "INV/1049",
+ "invoice_date": "2026-05-18",
+ "currency": "NPR",
+ "line_items": [
+  {
+   "description": "Steel rod kg",
+   "quantity": 120,
+   "unit_price": 95,
+   "amount": 11400
+  },
+  {
+   "description": "Bricks",
+   "quantity": 2000,
+   "unit_price": 18,
+   "amount": 36000
+  },
+  {
+   "description": "Cement bags",
+   "quantity": 50,
+   "unit_price": 900,
+   "amount": 45000
+  }
+ ],
+ "subtotal": 92400,
+ "tax_amount": 12012.0,
+ "total": 104412.0,
+ "bank": {
+  "account_name": "",
+  "account_number": "1122334455",
+  "bank_name": "NIC Asia Bank",
+  "branch": "Biratnagar"
+ }
+}
